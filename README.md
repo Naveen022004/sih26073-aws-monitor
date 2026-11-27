@@ -1,60 +1,107 @@
-# SIH26073: Intelligent AWS Anomaly Detection System
+# Intelligent AWS Anomaly Detection System
 
-A Streamlit prototype for monitoring Automatic Weather Station (AWS) observations. It combines rule-based sensor checks with an Isolation Forest model trained on a historical CSV baseline.
+A Streamlit prototype for exploring anomaly detection in Automatic Weather Station (AWS) observations. The project combines configurable rule-based checks with an Isolation Forest model to flag unusual sensor readings and present an auditable monitoring workflow.
 
-## Project files
+> **Project status:** Academic prototype. It is not connected to live AWS hardware or an operational weather service. Fault-injection scenarios are simulated for testing.
 
-- `app.py` — Streamlit dashboard, telemetry simulation, charts, anomaly audit log and CSV export.
-- `detector.py` — Hybrid anomaly detection engine.
-- `sample_aws_data.csv` — Bundled example baseline. Verify its provenance before describing it as real operational AWS data.
-- `requirements.txt` — Python dependencies.
+## Highlights
 
-## Run locally (Windows)
+- Streamlit dashboard for inspecting station observations.
+- Hybrid detection pipeline: rule-based validation plus Isolation Forest.
+- Charts, anomaly status, and a session audit log.
+- CSV export for the telemetry generated during a session.
+- CSV upload for testing with another baseline dataset.
+- Demonstration scenarios for spikes, frozen readings, out-of-range humidity, and gradual weather changes.
 
-Open PowerShell in the repository folder and run:
+## Screenshots
 
+No verified UI screenshots are currently stored in this repository. Add genuine captures under `docs/screenshots/` and embed them here, for example:
+
+- `docs/screenshots/dashboard.png` — main dashboard
+- `docs/screenshots/anomaly-alert.png` — detected anomaly and explanation
+- `docs/screenshots/audit-log.png` — event history and export
+
+## Tech Stack
+
+Python · Streamlit · pandas · NumPy · scikit-learn · Plotly
+
+## Repository Layout
+
+```text
+.
+├── app.py                 # Streamlit dashboard and user interactions
+├── detector.py            # Hybrid anomaly detection logic
+├── sample_aws_data.csv    # Example baseline dataset
+├── requirements.txt       # Python dependencies
+└── README.md
+```
+
+## Run Locally
+
+**Requirements:** Python 3.10 or later is recommended.
+
+```bash
+git clone https://github.com/Naveen022004/sih26073-aws-monitor.git
+cd sih26073-aws-monitor
+
+python -m venv .venv
+```
+
+Activate the environment:
+
+**Windows PowerShell**
 ```powershell
-py -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux**
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies and start the app:
+
+```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-If PowerShell blocks activation, run the install and launch commands using the venv executable directly:
+Open the local address printed by Streamlit (usually http://localhost:8501).
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m streamlit run app.py
-```
+## Deploy to Streamlit Community Cloud
 
-Open the local URL printed in the terminal (normally http://localhost:8501).
+1. Sign in at [Streamlit Community Cloud](https://share.streamlit.io/) using GitHub.
+2. Choose **Create app**.
+3. Select `Naveen022004/sih26073-aws-monitor`, branch `main`, and main file `app.py`.
+4. Deploy and wait for dependency installation to finish.
 
-## Run on Streamlit Community Cloud
+**Live demo:** Not yet documented here. Add the public Streamlit app URL after deployment; do not use the profile URL as the app URL.
 
-1. Push this repository to GitHub.
-2. Open https://share.streamlit.io/ and sign in with GitHub.
-3. Select **Create app** and choose `Naveen022004/sih26073-aws-monitor`.
-4. Set the branch to `main` and the main file path to `app.py`.
-5. Deploy. Streamlit Cloud installs packages from `requirements.txt`.
+## How to Use
 
-## Dashboard usage
+1. Launch the dashboard and choose a station label.
+2. Select **Generate next reading** to process an observation.
+3. Choose a demonstration scenario to test the detector.
+4. Review the latest status, charts, and audit log.
+5. Export session telemetry as CSV, or upload a compatible baseline CSV.
 
-1. Select a station label in the sidebar.
-2. Click **Generate next reading** to process one observation from the baseline CSV.
-3. Select a test scenario to inject a simulated fault:
-   - Temperature sensor spike (+20 °C)
-   - Frozen sensor
-   - Humidity out of range (120%)
-   - Storm-front test (gradual valid change)
-4. Review the latest status, charts and anomaly audit log.
-5. Download the session telemetry using **Download telemetry CSV**.
-6. Upload another CSV baseline using the sidebar uploader. It must contain numeric `temperature`, `pressure`, and `humidity` columns and at least 10 valid rows. A timestamp column is optional.
+Uploaded datasets should contain numeric `temperature`, `pressure`, and `humidity` columns with at least 10 valid rows. A timestamp column is optional. Confirm dataset provenance, station identity, units, and quality before interpreting results.
 
-## Important notes
+## Limitations
 
-- The dashboard processes one observation per button click; it does not run an uncontrolled infinite rerun loop.
-- Fault injection scenarios are simulations for demonstration and testing, not live sensor readings.
-- The health index is a simple prototype indicator based on flagged frames, not a calibrated reliability metric.
-- The dew-point calculation in the detector should not be interpreted as proof of sensor fault without a physically valid cross-sensor model and domain validation.
-- Confirm the source, units, station identity and quality of any uploaded dataset before using it for research or operational decisions.
+- Demonstration fault scenarios are simulated, not real sensor faults.
+- The bundled CSV should not be described as operational Indian AWS data unless its provenance is independently verified.
+- The health indicator is a prototype summary, not a calibrated reliability score.
+- Model outputs require validation against labelled, representative station data before operational use.
+
+## Future Work
+
+- Validate against traceable, labelled AWS observations.
+- Add station metadata, sensor-specific thresholds, and unit validation.
+- Improve fault explanations and model evaluation.
+- Add automated tests and a documented live deployment.
+
+## Author
+
+**Naveen Sindhu** · [GitHub](https://github.com/Naveen022004)
