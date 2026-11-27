@@ -1,107 +1,182 @@
 # Intelligent AWS Anomaly Detection System
 
-A Streamlit prototype for exploring anomaly detection in Automatic Weather Station (AWS) observations. The project combines configurable rule-based checks with an Isolation Forest model to flag unusual sensor readings and present an auditable monitoring workflow.
+A Streamlit-based academic prototype for exploring anomaly detection in Automatic Weather Station (AWS) observations. It combines rule-based sensor validation with an Isolation Forest model to flag unusual temperature, pressure, and humidity readings.
 
-> **Project status:** Academic prototype. It is not connected to live AWS hardware or an operational weather service. Fault-injection scenarios are simulated for testing.
+> **Project status:** Academic prototype for SIH26073. It does not connect to live AWS hardware or an operational weather service. Fault-injection scenarios are simulated for demonstration and testing.
 
-## Highlights
+## Table of contents
 
-- Streamlit dashboard for inspecting station observations.
-- Hybrid detection pipeline: rule-based validation plus Isolation Forest.
-- Charts, anomaly status, and a session audit log.
-- CSV export for the telemetry generated during a session.
-- CSV upload for testing with another baseline dataset.
-- Demonstration scenarios for spikes, frozen readings, out-of-range humidity, and gradual weather changes.
+- [Overview](#overview)
+- [Key features](#key-features)
+- [How it works](#how-it-works)
+- [Technology stack](#technology-stack)
+- [Project structure](#project-structure)
+- [Dataset format](#dataset-format)
+- [Getting started](#getting-started)
+- [Deploy on Streamlit Community Cloud](#deploy-on-streamlit-community-cloud)
+- [Using the dashboard](#using-the-dashboard)
+- [Limitations and responsible interpretation](#limitations-and-responsible-interpretation)
+- [Roadmap](#roadmap)
+- [Author](#author)
 
-## Screenshots
+## Overview
 
-No verified UI screenshots are currently stored in this repository. Add genuine captures under `docs/screenshots/` and embed them here, for example:
+Automatic Weather Stations collect environmental observations that need to be checked for sensor errors and unusual values. This project demonstrates a hybrid approach to flagging potentially abnormal observations and presenting the results in an interactive dashboard.
 
-- `docs/screenshots/dashboard.png` — main dashboard
-- `docs/screenshots/anomaly-alert.png` — detected anomaly and explanation
-- `docs/screenshots/audit-log.png` — event history and export
+The prototype monitors three parameters:
 
-## Tech Stack
+| Parameter | Unit |
+|---|---|
+| Temperature | °C |
+| Atmospheric pressure | hPa |
+| Relative humidity | % |
 
-Python · Streamlit · pandas · NumPy · scikit-learn · Plotly
+## Key features
 
-## Repository Layout
+- **Interactive dashboard:** View the latest observation, telemetry history, charts, and anomaly audit log.
+- **Hybrid detection:** Combine physical-boundary and temporal checks with an Isolation Forest baseline model.
+- **Demonstration scenarios:** Test a temperature spike, frozen sensor, out-of-range humidity, and gradual weather change.
+- **Estimated replacement values:** Display rolling-median estimates for flagged readings.
+- **Data upload:** Load a historical CSV as the model baseline.
+- **Export:** Download session telemetry as a CSV file.
+- **Session audit trail:** Review flagged observations, severity, confidence, and explanations.
+
+## How it works
+
+The current prototype follows this processing flow:
+
+1. Load the bundled baseline CSV or upload a historical dataset.
+2. Validate the required columns and retain rows with valid numeric readings.
+3. Fit an Isolation Forest model to the baseline temperature, pressure, and humidity values.
+4. Process the next baseline observation when the user clicks **Generate next reading**.
+5. Apply hard physical limits and temporal checks, followed by multivariate model and dew-point consistency checks.
+6. Display the result, estimated replacement values, charts, and session audit information.
+
+The dashboard's scenario selector can inject test values into observations. These are controlled demonstrations, not faults collected from physical sensors.
+
+## Technology stack
+
+- Python
+- Streamlit
+- pandas and NumPy
+- scikit-learn (Isolation Forest)
+- Plotly
+
+## Project structure
 
 ```text
-.
-├── app.py                 # Streamlit dashboard and user interactions
+sih26073-aws-monitor/
+├── app.py                 # Streamlit dashboard and session workflow
 ├── detector.py            # Hybrid anomaly detection logic
-├── sample_aws_data.csv    # Example baseline dataset
+├── sample_aws_data.csv    # Bundled baseline/example dataset
 ├── requirements.txt       # Python dependencies
 └── README.md
 ```
 
-## Run Locally
+## Dataset format
 
-**Requirements:** Python 3.10 or later is recommended.
+Upload a CSV containing at least 10 valid rows and these numeric columns:
+
+```csv
+temperature,pressure,humidity
+24.5,1012.8,62.0
+25.1,1012.4,60.5
+```
+
+- `temperature`: degrees Celsius
+- `pressure`: hectopascals (hPa)
+- `humidity`: relative humidity in percent
+
+A timestamp column is optional. Rows with missing or non-numeric values in the three required columns are excluded during loading.
+
+**Data provenance matters:** Verify the source, station identity, units, collection period, and quality of any uploaded dataset before describing it as real AWS observations. The bundled CSV should not be presented as verified operational Indian AWS data unless its provenance has been independently established.
+
+## Getting started
+
+### Prerequisites
+
+- Python 3.10 or later
+- Git
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Naveen022004/sih26073-aws-monitor.git
 cd sih26073-aws-monitor
-
-python -m venv .venv
 ```
 
-Activate the environment:
+### 2. Create and activate a virtual environment
 
 **Windows PowerShell**
+
 ```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
 **macOS / Linux**
+
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install dependencies and start the app:
+### 3. Install dependencies
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+### 4. Run the application
+
+```bash
 python -m streamlit run app.py
 ```
 
-Open the local address printed by Streamlit (usually http://localhost:8501).
+Open the local URL printed in the terminal (usually http://localhost:8501).
 
-## Deploy to Streamlit Community Cloud
+## Deploy on Streamlit Community Cloud
 
-1. Sign in at [Streamlit Community Cloud](https://share.streamlit.io/) using GitHub.
-2. Choose **Create app**.
-3. Select `Naveen022004/sih26073-aws-monitor`, branch `main`, and main file `app.py`.
-4. Deploy and wait for dependency installation to finish.
+1. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) with GitHub.
+2. Select **Create app**.
+3. Choose repository `Naveen022004/sih26073-aws-monitor`.
+4. Select branch `main` and main file path `app.py`.
+5. Deploy and review the application logs if dependency installation or startup fails.
 
-**Live demo:** Not yet documented here. Add the public Streamlit app URL after deployment; do not use the profile URL as the app URL.
+**Live demo:** No verified public app URL is listed yet. Add the deployed application URL here after confirming that it is publicly accessible.
 
-## How to Use
+## Using the dashboard
 
-1. Launch the dashboard and choose a station label.
-2. Select **Generate next reading** to process an observation.
-3. Choose a demonstration scenario to test the detector.
-4. Review the latest status, charts, and audit log.
-5. Export session telemetry as CSV, or upload a compatible baseline CSV.
+1. Start the Streamlit app.
+2. Choose a demonstration station label in the sidebar.
+3. Optionally upload a CSV and select **Load uploaded baseline**.
+4. Select a test scenario.
+5. Click **Generate next reading**.
+6. Review the latest status, charts, telemetry history, and anomaly audit log.
+7. Use **Download telemetry CSV** to export the current session.
 
-Uploaded datasets should contain numeric `temperature`, `pressure`, and `humidity` columns with at least 10 valid rows. A timestamp column is optional. Confirm dataset provenance, station identity, units, and quality before interpreting results.
+The station labels are demonstration labels; they do not establish a connection to the named physical locations.
 
-## Limitations
+## Limitations and responsible interpretation
 
-- Demonstration fault scenarios are simulated, not real sensor faults.
-- The bundled CSV should not be described as operational Indian AWS data unless its provenance is independently verified.
-- The health indicator is a prototype summary, not a calibrated reliability score.
-- Model outputs require validation against labelled, representative station data before operational use.
+- The application is a prototype and does not ingest live AWS telemetry.
+- Fault scenarios are simulated; they are not verified sensor-fault events.
+- The Isolation Forest model is fitted to the selected baseline. Its output depends on the representativeness and quality of that data.
+- The configured physical limits and rate-of-change thresholds are demonstration settings, not universal meteorological standards.
+- The displayed confidence and health index are prototype indicators, not calibrated probabilities or certified sensor-reliability measurements.
+- Rolling-median replacement values are estimates and should not be treated as recovered ground-truth observations.
+- Operational use would require representative labelled datasets, station-specific calibration, validation, monitoring, and domain-expert review.
 
-## Future Work
+## Roadmap
 
-- Validate against traceable, labelled AWS observations.
-- Add station metadata, sensor-specific thresholds, and unit validation.
-- Improve fault explanations and model evaluation.
-- Add automated tests and a documented live deployment.
+- Validate the detector using traceable, labelled AWS observations.
+- Add station metadata, configurable sensor limits, and unit validation.
+- Evaluate detection performance with suitable metrics and documented test data.
+- Expand fault explanations and sensor-specific diagnostics.
+- Add automated tests and publish a verified live demonstration.
 
 ## Author
 
-**Naveen Sindhu** · [GitHub](https://github.com/Naveen022004)
+**Naveen Sindhu**  
+[GitHub: @Naveen022004](https://github.com/Naveen022004)
